@@ -28,13 +28,14 @@ for (let n = 0; n < nodes.length - 1; n++) {
         const line = lines[ln]
         if (!line) break
         const [supply, need, range] = line.split(' ').map(Number)
-        for (let i = 0; i < needs.length; i++) {
+        for (let i = 0; i < needs.length / 2; i++) {
             if (needs[i] >= need && needs[i] < need + range) {
                 supplies.push(supply + needs[i] - need)
                 needs[i] = -1
+            } else if (needs[i] >= need + range) {
+                break
             }
         }
-        if (supplies.length === needs.length) break
         ln += 1
     }
 
