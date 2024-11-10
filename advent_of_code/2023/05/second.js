@@ -4,13 +4,23 @@ const input = fs.readFileSync('./input.txt', 'utf8')
 
 const lines = input.split('\n')
 
-let seeds = lines[0].split(' ').slice(1).map(Number)
+let seeds_ranges = lines[0].split(' ').slice(1).map(Number)
+
+let seeds = []
 
 console.log(seeds)
 
 let ln = 1
 
 const nodes = ["seed", "soil", "fertilizer", "water", "light", "temperature", "humidity", "location"]
+
+for (let i = 0; i < nodes.length / 2; i++) {
+    const start = seeds_ranges[i * 2]
+    const range = seeds_ranges[i * 2 + 1]
+    for (let j = 0; j < range; j++) {
+        seeds.push(start + j)
+    }
+}
 
 let needs = seeds
 
@@ -28,14 +38,13 @@ for (let n = 0; n < nodes.length - 1; n++) {
         const line = lines[ln]
         if (!line) break
         const [supply, need, range] = line.split(' ').map(Number)
-        for (let i = 0; i < needs.length / 2; i++) {
+        for (let i = 0; i < needs.length; i++) {
             if (needs[i] >= need && needs[i] < need + range) {
                 supplies.push(supply + needs[i] - need)
                 needs[i] = -1
-            } else if (needs[i] >= need + range) {
-                break
             }
         }
+        if (supplies.length === needs.length) break
         ln += 1
     }
 
