@@ -13,10 +13,8 @@ class Program
 
         try
         {
-            // Read all lines from the file into a string array
             string[] lines = File.ReadAllLines(filePath);
 
-            // Print each line
             foreach (string line in lines)
             {
                 int a, b;
@@ -35,9 +33,9 @@ class Program
         }
         catch (Exception e)
         {
-            Console.WriteLine("The file could not be read:");
             Console.WriteLine(e.Message);
         }
+
         Console.WriteLine(ans);
     }
 }
