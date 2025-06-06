@@ -1,0 +1,1 @@
+Just decode the cookie with base64.
