@@ -29,4 +29,8 @@ There are lots of strings in the source code. Find those that suits those ones i
 
 # variables
 
+Just replace the url with the responses in a shell script.
+
+# tree
+
 TBC...
