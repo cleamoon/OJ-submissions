@@ -6,59 +6,112 @@ const lines = input.split('\n')
 
 let seeds_ranges = lines[0].split(' ').slice(1).map(Number)
 
-let seeds = []
+let need_ranges = []
 
-console.log(seeds)
+for (let i = 0; i < seeds_ranges.length - 1; i += 2) {
+    const start = seeds_ranges[i]
+    const range = seeds_ranges[i + 1]
+    need_ranges.push({ start, range })
+}
+
+console.log('seeds:', need_ranges)
 
 let ln = 1
 
 const nodes = ["seed", "soil", "fertilizer", "water", "light", "temperature", "humidity", "location"]
 
-for (let i = 0; i < nodes.length / 2; i++) {
-    const start = seeds_ranges[i * 2]
-    const range = seeds_ranges[i * 2 + 1]
-    for (let j = 0; j < range; j++) {
-        seeds.push(start + j)
-    }
-}
-
-let needs = seeds
-
 for (let n = 0; n < nodes.length - 1; n++) {
     console.log(`${nodes[n]}-to-${nodes[n + 1]}`)
-    
+
     do {
         ln += 1
     } while (!lines[ln].startsWith(`${nodes[n]}-to-${nodes[n + 1]} map`))
     ln += 1
 
-    let supplies = []
+    let supply_ranges = []
 
     while (true) {
         const line = lines[ln]
         if (!line) break
-        const [supply, need, range] = line.split(' ').map(Number)
-        for (let i = 0; i < needs.length; i++) {
-            if (needs[i] >= need && needs[i] < need + range) {
-                supplies.push(supply + needs[i] - need)
-                needs[i] = -1
-            }
-        }
-        if (supplies.length === needs.length) break
+        const [need, supply, range] = line.split(' ').map(Number)
+
+        supply_ranges.push({ supply, need, range })
+
+        supply_ranges.sort((a, b) => a.supply - b.supply)
+
         ln += 1
     }
 
-    for (let i = 0; i < needs.length; i++) {
-        if (needs[i] !== -1) {
-            supplies.push(needs[i])
+    console.log('supply ranges:', supply_ranges)
+
+    let new_needs = []
+
+    for (let i = 0; i < need_ranges.length; i++) {
+        let { start: need_start, range: need_range } = need_ranges[i]
+        let id = 0
+        const need_end = need_start + need_range
+        while (true) {
+            if (id >= supply_ranges.length) {
+                new_needs.push({ start: need_start, range: need_range })
+                break
+            }
+
+            const { supply: supply_start, need: supply_need, range: supply_range } = supply_ranges[id]
+
+            let supply_end = supply_start + supply_range
+
+            if (supply_end <= need_start) {
+                id += 1
+                continue
+            }
+
+            if (supply_start > need_start) {
+                if (need_end <= supply_start) {
+                    new_needs.push({ start: need_start, range: need_range })
+                    break
+                }
+                if (need_end > supply_end) {
+                    new_needs.push({
+                        start: need_start,
+                        range: supply_start - need_start,
+                    })
+                    need_start = supply_start
+                    need_range -= supply_start - need_start
+                    continue
+                } else {
+                    new_needs.push({
+                        start: need_start,
+                        range: need_range,
+                    })
+                    break
+                }
+            }
+
+            if (supply_end >= need_end) {
+                new_needs.push({
+                    start: supply_need + (need_start - supply_start),
+                    range: need_range, // 22 - 15 = 7
+                })
+                break
+            } else {
+                const used_range = supply_end - need_start
+                new_needs.push({
+                    start: supply_need + (need_start - supply_start),
+                    range: used_range,
+                })
+                need_start += used_range // 12 + 3 = 15
+                need_range -= used_range // 10 - 3 = 7
+                id += 1
+            }
+
+            console.log('new need:', new_needs[new_needs.length - 1])
         }
+
     }
-
-    console.log(supplies)
-
-    needs = supplies
+    need_ranges = [...new_needs]
+    new_needs = []
 }
 
-const ans = Math.min(...needs)
+const ans = need_ranges.reduce((acc, { start }) => start < acc ? start : acc, Infinity)
 
 console.log(ans)
