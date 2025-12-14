@@ -4,27 +4,40 @@ const input = fs.readFileSync('./input.txt', 'utf8')
 
 const lines = input.split('\n')
 
-const nums = lines.map(line => line.split(/(\s+)/g)).slice(0, -1).map(line => line.filter(e => e > 0).map(Number))
+const matrix = lines.map(line => line.split(''))
 
-const ops = lines.slice(-1)[0].split(/(\s+)/g).filter(e => e.startsWith('+') || e.startsWith('*'))
+const transpose = new Array(matrix[0].length).fill(0).map(() => new Array(matrix.length).fill(0))
+
+for (let i = 0; i < matrix[0].length; i++) {
+  for (let j = 0; j < matrix.length; j++) {
+    transpose[i][j] = matrix[j][i]
+  }
+}
 
 let ans = 0
 
-for (let i = 0; i < nums[0].length; i++) {
-  let curr = 0
-  if (ops[i] === '+') {
-    curr = 0
-  } else {
-    curr = 1
+let numbers = []
+let ops = null
+
+for (let i = 0; i <= transpose.length; i++) {
+  const line = transpose[i]
+  if (i === transpose.length || line.every(e => e === line[0])) {
+    const res = ops === '+'
+      ? numbers.reduce((a, b) => a + b, 0)
+      : numbers.reduce((a, b) => a * b, 1)
+    ans += res
+
+    numbers = []
+    ops = null
+    continue
   }
-  for (let j = 0; j < nums.length; j++) {
-    if (ops[i] === '+') {
-      curr += nums[j][i]
-    } else {
-      curr *= nums[j][i]
-    }
+  const number = Number(line.slice(0, -1).join(''))
+  if (number > 0) numbers.push(number)
+  if (line[line.length - 1] === '+') {
+    ops = '+'
+  } else if (line[line.length - 1] === '*') {
+    ops = '*'
   }
-  ans += curr
 }
 
 console.log(ans)

@@ -36,7 +36,7 @@ for (let i = 0; i < lines.length; i++) {
 
 sortedDist.sort((a, b) => a.dist - b.dist)
 
-for (let i = 0; i < 1000; i++) {
+for (let i = 0; i < sortedDist.length; i++) {
   const { n1, n2, n1p, n2p } = sortedDist[i]
 
   const val = connectMatrix[n2]
@@ -46,21 +46,10 @@ for (let i = 0; i < 1000; i++) {
       connectMatrix[j] = connectMatrix[n1]
     }
   }
-}
 
-const connectToSize = new Map()
-
-for (let i = 0; i < connectMatrix.length; i++) {
-  const val = connectMatrix[i]
-  if (connectToSize.has(val)) {
-    connectToSize.set(val, connectToSize.get(val) + 1)
-  } else {
-    connectToSize.set(val, 1)
+  if (connectMatrix.every(e => e === connectMatrix[0])) {
+    console.log(n1p[0] * n2p[0])
+    break
   }
 }
 
-const sortedSizes = [...connectToSize].sort((a, b) => b[1] - a[1]).map(a => a[1])
-
-let ans = sortedSizes[0] * sortedSizes[1] * sortedSizes[2]
-
-console.log(ans)
