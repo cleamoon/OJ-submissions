@@ -2,27 +2,17 @@ const fs = require('node:fs')
 
 const input = fs.readFileSync('./input.txt', 'utf8')
 
-const lines = input.split('\n').map(line => line.split(''))
+const lines = input.split('\n').map(line => line.split(',').map(Number))
 
-let ans = 0
+let maxArea = -1
 
-let pos = [lines[0].indexOf('S')]
-
-for (let i = 1; i < lines.length; i++) {
-  const new_pos = new Set()
-
-  for (let j = 0; j < pos.length; j++) {
-    const x = pos[j]
-    if (lines[i][x] === '^') {
-      new_pos.add(x - 1)
-      new_pos.add(x + 1)
-      ans += 1
-    } else {
-      new_pos.add(x)
-    }
+for (let i = 0; i < lines.length; i++) {
+  for (let j = i + 1; j < lines.length; j++) {
+    const p1 = lines[i]
+    const p2 = lines[j]
+    const area = ((Math.abs(p1[0] - p2[0]) + 1) * Math.abs((p1[1] - p2[1]) + 1))
+    maxArea = area > maxArea ? area : maxArea
   }
-
-  pos = Array.from(new_pos)
 }
 
-console.log(ans)
+console.log(maxArea)
