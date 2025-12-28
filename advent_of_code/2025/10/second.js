@@ -1,63 +1,53 @@
 const fs = require('node:fs')
+const { Worker } = require('worker_threads')
+const path = require('path')
 
 const input = fs.readFileSync('./input.txt', 'utf8')
+const allLines = input.split('\n')
 
-const lines = input.split('\n')
+// Remove trailing empty lines or handle them gently
+const lines = allLines.filter(l => l.length > 0)
 
-let ans = 0
+const numThreads = 8
+const chunkSize = Math.ceil(lines.length / numThreads)
+const workers = []
 
-for (let i = 0; i < lines.length; i++) {
-  const line = lines[i]
+let completedWorkers = 0
+let totalAns = 0
 
-  if (line.length === 0) break
+console.log(`Starting processing with ${numThreads} threads for ${lines.length} lines.`)
 
-  const strInBracket = line.match(/\[(.*?)\]/)?.[1]
+for (let i = 0; i < numThreads; i++) {
+  const start = i * chunkSize
+  const end = Math.min((i + 1) * chunkSize, lines.length)
+  const chunk = lines.slice(start, end)
 
-  const strInParents = [...line.matchAll(/\((.*?)\)/g)].map(m => m[1])
+  if (chunk.length === 0) continue
 
-  const strInRoundBracket = line.match(/\{(.*?)\}/)?.[1]
-
-  console.log('bracket: ', strInBracket)
-  console.log('parent: ', strInParents)
-  console.log('round bracket: ', strInRoundBracket)
-
-  const target = strInBracket.split('').map(e => e === '#' ? 1 : 0).join('')
-  const switches = strInParents.map(str => str.split(',').map(Number))
-  const junct = strInRoundBracket.split(',').map(Number)
-
-  console.log('target: ', target)
-  console.log('switches: ', switches)
-  console.log('junct: ', junct)
-
-  let min = 1000000
-
-  const dp = (curr, rest, junc, res = 0) => {
-  //  console.log('dp: ', curr, rest, target, junc, res)
-    if (rest.length === 0) {
-      if (curr.join('') === target && junc.every(j => j === 0)) {
-        if (res < min) min = res
-        return res
-      }
-      return
+  const worker = new Worker(path.resolve(__dirname, './worker.js'), {
+    workerData: {
+      lines: chunk
     }
-    for (let t = 0; ; t++) {
-      const s = rest[0]
-      const currJunc = junc.map((e, i) => s.includes(i) ? e - t : e)
-      if (currJunc.some(e => e < 0)) {
-        return
-      }
-      dp(
-        curr.map((e, i) => (s.includes(i) && t % 2 === 1) ? 1 - e : e), 
-        rest.slice(1),
-        [...currJunc],
-        res + t,
-      )
+  })
+
+  workers.push(worker)
+
+  worker.on('message', (msg) => {
+    // console.log(`Worker ${i} finished with result: ${msg}`)
+    totalAns += msg
+  })
+
+  worker.on('error', (err) => {
+    console.error(`Worker ${i} error:`, err)
+  })
+
+  worker.on('exit', (code) => {
+    if (code !== 0)
+      console.error(new Error(`Worker ${i} stopped with exit code ${code}`))
+
+    completedWorkers++
+    if (completedWorkers === workers.length) {
+      console.log(totalAns)
     }
-  }
-
-  dp(Array(target.length).fill(0), switches, [...junct])
-
-  ans += min
+  })
 }
-
-console.log(ans)
