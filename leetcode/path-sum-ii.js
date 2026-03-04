@@ -15,6 +15,7 @@ var pathSum = function(root, targetSum) {
     let ans = []
     let path = []
     const find = (node, s = 0) => {
+        if (!node) return
         const ns = s + node.val
         path.push(node.val)
         if (!node.left) {
