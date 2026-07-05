@@ -55,4 +55,18 @@ Note that the `-md md5` part is necessary for newer version of OpenSSL.
 
 # nqueens
 
-TBC
+Find all possible 9-queens solution, then find which solution code gives the right sha1. The code for the solution is in the `nqueens.py` file. 
+
+# 953172864
+
+This is simple base-26 number conversions. The code is in the `excel.py` file. 
+
+# DUYO
+
+The hint of the two pictures can be found by googling there file names, you can find the [pigen cipher](https://en.wikipedia.org/wiki/Pigpen_cipher). 
+
+The task is simple enough to be done by hand. 
+
+# helloworld
+
+All clear!
